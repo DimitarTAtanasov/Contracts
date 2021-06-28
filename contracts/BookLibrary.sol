@@ -1,9 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.7.0;
-pragma abicoder v2;
+// pragma abicoder v2;
+pragma experimental ABIEncoderV2;
 import './Ownable.sol';
+import "./LibToken.sol";
+import "./LIBWrapper.sol";
 
 contract BookLibrary is Ownable {
+    LibToken public LIBToken;
+    WrapperContract public wrapperContract;
+
+    address wrapperAddress;
+    address tokenAddress;
+
 
     struct Book {
         string bookName;
@@ -18,17 +27,30 @@ contract BookLibrary is Ownable {
     mapping (address => mapping(bytes32 => uint8)) public userBorrowedBooks;
     //Array with the keys of all existing books 
     bytes32[] public bookKeys;
+    uint256 public rentPrice = 10000000000000000;
     
     //Adding events so the front-end could hook to them
     event NewBookAdded(address _user, string _bookName, uint64 _quantity);
     event BookBorrowed(address _user, string _bookName);
     event BookReturned(address _user, string _bookName);
+    event UnwrapInBookContract(uint _amount);
+
+    constructor(address _libTokenAddress, address _libWrapperAddress) public {
+        address payable payableWrapperAddress = address(uint160(_libWrapperAddress));
+        tokenAddress = _libTokenAddress;
+        wrapperAddress = _libWrapperAddress;
+
+		// libToken = new LibToken();
+        // wrapperContract = new WrapperContract();
+        LIBToken = LibToken(_libTokenAddress);
+        wrapperContract = WrapperContract(payableWrapperAddress);
+	}
 
     modifier validTitle(string memory _bookName) {
         require (bytes(_bookName).length > 0, "You have to provide book name");
         _;
     }
-    
+
     modifier validQuantity(uint64 _numberOfCopies) {
         require (_numberOfCopies > 0, "You need to provide valid quantity");
         _;
@@ -63,6 +85,8 @@ contract BookLibrary is Ownable {
     }
     
     function borrowBookById(bytes32 _bookId) public userAllowedToBorrowBook(_bookId) {
+        LIBToken.transferFrom(msg.sender, address(this), rentPrice);
+
         books[_bookId].numberOfCopies--;
         books[_bookId].borrowedFromAdresses.push(msg.sender);
         userBorrowedBooks[msg.sender][_bookId] = 1;
@@ -95,4 +119,15 @@ contract BookLibrary is Ownable {
         
         return availableBooks;
     }
+
+    function exchangeTokens(uint _amount) public onlyOwner {
+        LIBToken.approve(wrapperAddress, _amount);
+        emit UnwrapInBookContract(_amount);
+        wrapperContract.unwrap(_amount);
+    }
+
+
+	// receive() external payable {
+	// 	wrapperContract.wrap();
+	// } 
 }

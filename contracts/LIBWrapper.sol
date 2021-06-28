@@ -2,31 +2,35 @@
 pragma solidity ^0.7.0;
 // pragma abicoder v2;
 
-import "./WETH.sol";
+import "./LibToken.sol";
 
-contract ETHWrapper {
+contract WrapperContract {
 
-	WETH public WETHToken;
+	LibToken public LIBToken;
 
 	event LogETHWrapped(address sender, uint256 amount);
 	event LogETHUnwrapped(address sender, uint256 amount);
+    event UnwrapInWrapperContract(uint _amount);
+
 
 	constructor() public {
-		WETHToken = new WETH();
+		LIBToken = new LibToken();
 	}
 
 	function wrap() public payable {
 		require(msg.value > 0, "We need to wrap at least 1 wei");
-		WETHToken.mint(msg.sender, msg.value);
+		LIBToken.mint(msg.sender, msg.value);
 		emit LogETHWrapped(msg.sender, msg.value);
 	}
 
 	function unwrap(uint value) public {
+        emit UnwrapInWrapperContract(value);
+
 		require(value > 0, "We need to unwrap at least 1 wei");
-		WETHToken.transferFrom(msg.sender, address(this), value);
-		WETHToken.burn(value);
+		LIBToken.transferFrom(msg.sender, address(this), value);
+		LIBToken.burn(value);
 		msg.sender.transfer(value);
-		emit LogETHUnwrapped(msg.sender, value);
+		// emit LogETHUnwrapped(msg.sender, value);
 	}
 
 	receive() external payable {
