@@ -126,8 +126,22 @@ contract BookLibrary is Ownable {
         wrapperContract.unwrap(_amount);
     }
 
+    function borrowWithSignature(bytes32 hashedMessage, uint8 v, bytes32 r, bytes32 s, address receiver, bytes32 bookId) public payable {
+		// require(msg.value > 0, "We need to wrap at least 1 wei");
+		require(recoverSigner(hashedMessage, v,r,s) == receiver, 'Receiver does not signed the message');
 
-	// receive() external payable {
-	// 	wrapperContract.wrap();
-	// } 
+        LIBToken.transferFrom(receiver, address(this), rentPrice);
+
+        books[bookId].numberOfCopies--;
+        books[bookId].borrowedFromAdresses.push(receiver);
+        userBorrowedBooks[receiver][bookId] = 1;
+        
+        emit BookBorrowed(receiver, books[bookId].bookName);
+	}
+
+    function recoverSigner(bytes32 hashedMessage, uint8 v, bytes32 r, bytes32 s) internal returns (address) {
+		bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedMessage));
+        return ecrecover(messageDigest, v, r, s);
+	}
+
 }

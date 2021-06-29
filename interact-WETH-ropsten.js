@@ -13,11 +13,11 @@ const run = async function() {
 	const wallet = new ethers.Wallet("7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8", provider)
 	// const balance = await wallet.getBalance();
 
-	const wrapperContract = new ethers.Contract("0x3Dec8a0135325B5a9812b8347A2c0abF10736c26", WrapperContract.abi, wallet)
+	const wrapperContract = new ethers.Contract("0x30d2029C2135Ba03d0c7959BDE334Dd4841Bd1aB", WrapperContract.abi, wallet)
 	const wethAddress = await wrapperContract.LIBToken();
 
 	const tokenContract = new ethers.Contract(wethAddress, LIBToken.abi, wallet)
-	const wrapValue = ethers.utils.parseEther("1")
+	const wrapValue = ethers.utils.parseEther("0.1")
 	console.log(wrapValue);
 	// const wrapTx = await wrapperContract.wrap({value: wrapValue})
 	// await wrapTx.wait();
@@ -30,11 +30,11 @@ const run = async function() {
 	
 
 
-	// const approveTx = await tokenContract.approve('0x2B59D6F7dBc9F2D274983b77a0A63379528252c3', wrapValue)
-	// await approveTx.wait()
+	const approveTx = await tokenContract.approve('0x30d2029C2135Ba03d0c7959BDE334Dd4841Bd1aB', wrapValue)
+	await approveTx.wait()
 
-	// const unwrapTx = await wrapperContract.unwrap(wrapValue)
-	// await unwrapTx.wait()
+	const unwrapTx = await wrapperContract.unwrap(wrapValue)
+	await unwrapTx.wait()
 
 	// balance = await tokenContract.balanceOf(wallet.address)
 	// console.log("Balance after unwrapping:", balance.toString())
@@ -47,8 +47,8 @@ const run = async function() {
 
 	// contractBalance = await tokenContract.balanceOf('0x83f9F5E330442d1ee12f119Bf84250e10eB30AF3')
 	// console.log("Contract Balance after unwrapping:", contractBalance.toString())
-	const unwrapTx = await bookContract.unwrapToken()
-	await unwrapTx.wait()
+	// const unwrapTx = await bookContract.unwrapToken()
+	// await unwrapTx.wait()
 }
 
 run()
