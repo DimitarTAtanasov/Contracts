@@ -7,7 +7,7 @@ import "./LibToken.sol";
 import "./LIBWrapper.sol";
 
 contract BookLibrary is Ownable {
-    LibToken public LIBToken;
+    LIB public LIBToken;
     WrapperContract public wrapperContract;
 
     address wrapperAddress;
@@ -40,9 +40,7 @@ contract BookLibrary is Ownable {
         tokenAddress = _libTokenAddress;
         wrapperAddress = _libWrapperAddress;
 
-		// libToken = new LibToken();
-        // wrapperContract = new WrapperContract();
-        LIBToken = LibToken(_libTokenAddress);
+        LIBToken = LIB(_libTokenAddress);
         wrapperContract = WrapperContract(payableWrapperAddress);
 	}
 
@@ -84,8 +82,9 @@ contract BookLibrary is Ownable {
         emit NewBookAdded(msg.sender, _bookName, _numberOfCopies);
     }
     
-    function borrowBookById(bytes32 _bookId) public userAllowedToBorrowBook(_bookId) {
-        LIBToken.transferFrom(msg.sender, address(this), rentPrice);
+    function borrowBookById(bytes32 _bookId, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public userAllowedToBorrowBook(_bookId) {
+        LIBToken.permit(msg.sender, address(this), value, deadline, v,r,s);
+		LIBToken.transferFrom(msg.sender, address(this), rentPrice);
 
         books[_bookId].numberOfCopies--;
         books[_bookId].borrowedFromAdresses.push(msg.sender);

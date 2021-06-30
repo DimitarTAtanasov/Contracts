@@ -6,7 +6,7 @@ import "./LibToken.sol";
 
 contract WrapperContract {
 
-	LibToken public LIBToken;
+	LIB public LIBToken;
 
 	event LogETHWrapped(address sender, uint256 amount);
 	event LogETHUnwrapped(address sender, uint256 amount);
@@ -14,7 +14,7 @@ contract WrapperContract {
 
 
 	constructor() public {
-		LIBToken = new LibToken();
+		LIBToken = new LIB();
 	}
 
 	function wrap() public payable {
