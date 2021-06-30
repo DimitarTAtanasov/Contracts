@@ -8,8 +8,8 @@ const deploy = async (network, secret, etherscanApiKey) => {
 	// const result = await deployer.deploy(WrapperContract);
 	// const address = await result.LIBToken();
 	// console.log(address)
-	const result = await deployer.deploy(BookLibrary, {}, '0xA6F9bf0babA0595d853673e4e29c137e73B660BE', '0x180e1DecD40562C5B6b5f61A5F865178FC666BBC');
-//0x67CFB2f80E53102EF11630E51f4B352DCc21bC0a lib contract
+	const result = await deployer.deploy(BookLibrary, {}, '0x9caEc5354b88b3dA265B69de6AB27EE5f3A073F0', '0x8f7144ade7424139115A51c14F2a3332fff80060');
+//0x5D5FE3092daa844B827E852dd1A3F078A428495f lib contract
 
 };
 

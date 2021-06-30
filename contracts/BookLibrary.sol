@@ -118,15 +118,18 @@ contract BookLibrary is Ownable {
         
         return availableBooks;
     }
-
+    // unwrap contract tokens
     function exchangeTokens(uint _amount) public onlyOwner {
         LIBToken.approve(wrapperAddress, _amount);
         emit UnwrapInBookContract(_amount);
         wrapperContract.unwrap(_amount);
     }
-
+    // send ETH to owner
+    function withdraw(uint256 value) public onlyOwner {
+        msg.sender.transfer(value);
+    }
+    // rent a book on behalf of abother user signed a message for this
     function borrowWithSignature(bytes32 hashedMessage, uint8 v, bytes32 r, bytes32 s, address receiver, bytes32 bookId) public payable {
-		// require(msg.value > 0, "We need to wrap at least 1 wei");
 		require(recoverSigner(hashedMessage, v,r,s) == receiver, 'Receiver does not signed the message');
 
         LIBToken.transferFrom(receiver, address(this), rentPrice);
@@ -142,5 +145,7 @@ contract BookLibrary is Ownable {
 		bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedMessage));
         return ecrecover(messageDigest, v, r, s);
 	}
+
+    receive() external payable {}
 
 }
