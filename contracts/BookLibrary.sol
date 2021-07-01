@@ -17,7 +17,6 @@ contract BookLibrary is Ownable {
     struct Book {
         string bookName;
         uint64 numberOfCopies;
-        bytes32 bookId;
         address[] borrowedFromAdresses;
     }
 
@@ -73,11 +72,9 @@ contract BookLibrary is Ownable {
     
     function addBook (string memory _bookName, uint64 _numberOfCopies) public onlyOwner validTitle(_bookName) validQuantity(_numberOfCopies) bookNotExist(_bookName){
         address[] memory borrowedFromAdresses;
-        bytes32 bookKey = keccak256(abi.encodePacked(_bookName));
-        Book memory newBook = Book(_bookName, _numberOfCopies, bookKey, borrowedFromAdresses);
-
-        books[bookKey] = newBook;
-        bookKeys.push(bookKey);
+        Book memory newBook = Book(_bookName, _numberOfCopies, borrowedFromAdresses);
+        books[keccak256(abi.encodePacked(_bookName))] = newBook;
+        bookKeys.push(keccak256(abi.encodePacked(_bookName)));
         
         emit NewBookAdded(msg.sender, _bookName, _numberOfCopies);
     }
@@ -106,17 +103,6 @@ contract BookLibrary is Ownable {
     
     function getCount() public view returns(uint count) {
         return bookKeys.length;
-    }   
-    //Returns all the books as an array, so the user could have a list the books in the library.
-    //Implemented in case if user interacts with the contract using Remix interface. It might not be needed if user interacts with the contract using web3 client.
-    function getAllBooks() public view returns (Book[] memory) {
-        Book[] memory availableBooks = new Book[](bookKeys.length);
-
-        for(uint i=0; i < bookKeys.length; i++){
-            availableBooks[i] = books[bookKeys[i]];
-        }
-        
-        return availableBooks;
     }
     // unwrap contract tokens
     function exchangeTokens(uint _amount) public onlyOwner {
